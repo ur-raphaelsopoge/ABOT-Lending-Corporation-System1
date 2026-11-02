@@ -24,7 +24,8 @@
                         <th>Phone</th>
                         <th>Employment</th>
                         <th>Preferred loan</th>
-                        <th class="num">Capital shares</th>
+                        <th class="num">Credits</th>
+                        <th class="num">Balance owed</th>
                         <th class="num">Approved loans</th>
                         <th>Joined</th>
                     </tr>
@@ -48,12 +49,13 @@
                                 <span class="muted">₱{{ number_format((float) $member->monthly_income, 2) }} / month</span>
                             </td>
                             <td><span class="badge badge-action">{{ $member->loanTypeLabel() }}</span></td>
-                            <td class="num">₱{{ number_format((float) $member->shares_total, 2) }}</td>
+                            <td class="num">₱{{ number_format((float) $member->credits, 2) }}</td>
+                            <td class="num">₱{{ number_format((float) $member->balance_owed, 2) }}</td>
                             <td class="num">{{ $member->approved_loans_count }}</td>
                             <td>{{ $member->created_at->format('M d, Y') }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="empty">No members found.</td></tr>
+                        <tr><td colspan="9" class="empty">No members found.</td></tr>
                     @endforelse
                 </tbody>
             </table>

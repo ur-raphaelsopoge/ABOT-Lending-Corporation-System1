@@ -12,34 +12,29 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
     protected static ?string $password;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
+            'borrower_id' => 'BRW-'.str_pad((string) fake()->unique()->numberBetween(1, 99999), 5, '0', STR_PAD_LEFT),
             'name' => fake()->name(),
+            'date_of_birth' => fake()->date('Y-m-d', '-21 years'),
+            'phone_number' => '09'.fake()->numerify('#########'),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'address' => fake()->streetAddress().', '.fake()->city(),
+            'id_type' => 'philsys',
+            'id_number' => 'PSN-'.fake()->unique()->numerify('####-####'),
+            'employment_status' => 'employed',
+            'monthly_income' => 25000,
+            'emergency_contact_name' => fake()->name(),
+            'emergency_contact_relationship' => 'Sibling',
+            'emergency_contact_phone' => '09'.fake()->numerify('#########'),
+            'loan_type' => 'personal',
+            'credits' => 0,
+            'balance_owed' => 0,
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
-    }
-
-    /**
-     * Indicate that the model's email address should be unverified.
-     */
-    public function unverified(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
     }
 }

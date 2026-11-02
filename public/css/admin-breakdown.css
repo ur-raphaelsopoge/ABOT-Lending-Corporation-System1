@@ -1,0 +1,46 @@
+.review-form {
+    min-width: 250px;
+}
+
+.review-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ink-500);
+}
+
+.amount-field {
+    position: relative;
+    display: block;
+}
+
+.amount-field span {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    font-weight: 700;
+    color: var(--ink-500);
+}
+
+.review-form .amount-field input {
+    padding-left: 24px;
+}
+
+.breakdown {
+    display: grid;
+    gap: 3px;
+    font-size: 0.85rem;
+    color: var(--ink-500);
+    white-space: nowrap;
+}
+
+.breakdown strong {
+    color: var(--ink-900);
+}
+
+.tone-green {
+    color: #15803d;
+}

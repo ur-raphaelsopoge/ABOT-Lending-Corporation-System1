@@ -16,8 +16,8 @@
         $navItems = [
             ['route' => 'admin.dashboard', 'label' => 'Dashboard', 'icon' => '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>'],
             ['route' => 'admin.members.index', 'label' => 'Member List', 'icon' => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 010 6.8M18.5 14.4c1.8.7 3 2.4 3 5.6"/>'],
-            ['route' => 'admin.capital-shares.index', 'label' => 'Capital Shares', 'icon' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5c0-1 1.1-1.8 2.5-1.8s2.5.8 2.5 1.8-1.1 1.6-2.5 1.9-2.5.9-2.5 1.9 1.1 1.8 2.5 1.8 2.5-.8 2.5-1.8"/>'],
-            ['route' => 'admin.receipt-logs.index', 'label' => 'Receipt Log', 'icon' => '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/>'],
+            ['route' => 'admin.active-loans.index', 'label' => 'Active Loans', 'icon' => '<path d="M4 7h16v10H4z"/><path d="M8 11h8M8 14h5"/><circle cx="17" cy="17" r="3"/><path d="M17 15.8v1.4l.9.9"/>'],
+            ['route' => 'admin.loan-payments.index', 'label' => 'Loan Payments', 'icon' => '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3z"/><path d="M9 8h6M9 12h6"/>'],
             ['route' => 'admin.loans.index', 'label' => 'Loan Portfolio', 'icon' => '<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 9.5v.01M17.5 14.5v.01"/>'],
             ['route' => 'admin.audit-ledger.index', 'label' => 'Audit Ledger', 'icon' => '<path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>'],
         ];

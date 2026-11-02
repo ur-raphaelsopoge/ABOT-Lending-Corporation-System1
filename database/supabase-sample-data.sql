@@ -26,37 +26,67 @@ from (values
 )
 on conflict do nothing;
 
-insert into public.capital_shares (member_id, amount, share_date, notes)
-select u.id, v.amount, v.share_date, v.notes
-from (values
-    ('maria.santos@example.com', 1000.00, current_date - 45, 'Initial capital share'),
-    ('juan.delacruz@example.com', 1500.00, current_date - 40, 'Initial capital share'),
-    ('ana.reyes@example.com', 500.00, current_date - 20, 'Initial capital share'),
-    ('maria.santos@example.com', 500.00, current_date - 10, 'Additional contribution'),
-    ('carlo.mendoza@example.com', 2000.00, current_date - 3, 'Initial capital share')
-) as v (email, amount, share_date, notes)
-join public.users u on u.email = v.email;
-
-insert into public.receipt_logs (member_id, receipt_number, amount, payment_method, received_at, notes)
-select u.id, v.receipt_number, v.amount, v.payment_method, v.received_at, v.notes
-from (values
-    ('maria.santos@example.com', 'OR-0001', 1000.00, 'cash', now() - interval '45 days', 'Capital share payment'),
-    ('juan.delacruz@example.com', 'OR-0002', 1500.00, 'gcash', now() - interval '40 days', 'Capital share payment'),
-    ('maria.santos@example.com', 'OR-0003', 850.00, 'cash', now() - interval '12 days', 'Loan payment'),
-    ('ana.reyes@example.com', 'OR-0004', 500.00, 'bank_transfer', now() - interval '6 days', 'Capital share payment'),
-    ('carlo.mendoza@example.com', 'OR-0005', 2000.00, 'cash', now() - interval '3 days', 'Capital share payment')
-) as v (email, receipt_number, amount, payment_method, received_at, notes)
-join public.users u on u.email = v.email
-on conflict (receipt_number) do nothing;
-
-insert into public.loan_applications (user_id, loan_type, amount, term_months, purpose, status, admin_remarks, reviewed_by, reviewed_at)
-select u.id, v.loan_type, v.amount, v.term_months, v.purpose, v.status, v.admin_remarks,
+insert into public.loan_applications (
+    user_id, loan_type, amount, approved_amount, term_months, purpose, status,
+    interest_rate, total_interest, total_payable, monthly_amortization,
+    outstanding_balance, repayment_status, admin_remarks, reviewed_by, reviewed_at
+)
+select
+    u.id, v.loan_type, v.amount, v.approved_amount, v.term_months, v.purpose, v.status,
+    8,
+    case when v.status = 'approved' then round(v.approved_amount * 8 / 100 * v.term_months / 12, 2) else null end,
+    case when v.status = 'approved' then round(v.approved_amount + round(v.approved_amount * 8 / 100 * v.term_months / 12, 2), 2) else null end,
+    case when v.status = 'approved' then round((v.approved_amount + round(v.approved_amount * 8 / 100 * v.term_months / 12, 2)) / v.term_months, 2) else null end,
+    case when v.status = 'approved' then round(v.approved_amount + round(v.approved_amount * 8 / 100 * v.term_months / 12, 2), 2) else null end,
+    case when v.status = 'approved' then 'active' else null end,
+    v.admin_remarks,
     case when v.status = 'pending' then null else (select id from public.admins order by id limit 1) end,
     case when v.status = 'pending' then null else now() - interval '2 days' end
 from (values
-    ('maria.santos@example.com', 'personal', 15000.00, 6, 'Tuition fees for my younger sibling', 'approved', 'Approved. Documents verified.'),
-    ('juan.delacruz@example.com', 'business', 40000.00, 12, 'Additional stock for my sari-sari store', 'approved', null),
-    ('ana.reyes@example.com', 'emergency', 8000.00, 3, 'Hospital bills for a family member', 'pending', null),
-    ('carlo.mendoza@example.com', 'personal', 50000.00, 24, 'Home repairs after the recent typhoon', 'rejected', 'Requested amount exceeds current capacity.')
-) as v (email, loan_type, amount, term_months, purpose, status, admin_remarks)
+    ('maria.santos@example.com', 'personal', 15000.00, 15000.00, 6, 'Tuition fees for my younger sibling', 'approved', 'Approved. Documents verified.'),
+    ('juan.delacruz@example.com', 'business', 40000.00, 40000.00, 12, 'Additional stock for my sari-sari store', 'approved', null),
+    ('ana.reyes@example.com', 'emergency', 8000.00, null, 3, 'Hospital bills for a family member', 'pending', null),
+    ('carlo.mendoza@example.com', 'personal', 50000.00, null, 24, 'Home repairs after the recent typhoon', 'rejected', 'Requested amount exceeds current capacity.')
+) as v (email, loan_type, amount, approved_amount, term_months, purpose, status, admin_remarks)
 join public.users u on u.email = v.email;
+
+update public.users u
+set credits = coalesce((
+        select sum(coalesce(la.approved_amount, la.amount))
+        from public.loan_applications la
+        where la.user_id = u.id and la.status = 'approved'
+    ), 0),
+    balance_owed = coalesce((
+        select sum(coalesce(la.outstanding_balance, 0))
+        from public.loan_applications la
+        where la.user_id = u.id and la.repayment_status = 'active'
+    ), 0);
+
+insert into public.loan_payments (
+    loan_application_id, user_id, reference_number, amount, payment_method, status, notes, confirmed_by, confirmed_at
+)
+select
+    la.id, la.user_id, v.reference_number, v.amount, v.payment_method, v.status, v.notes,
+    case when v.status = 'confirmed' then (select id from public.admins order by id limit 1) else null end,
+    case when v.status = 'confirmed' then now() - interval '5 days' else null end
+from (values
+    ('maria.santos@example.com', 'GCASH-REF-1001', 2500.00, 'gcash', 'confirmed', 'First monthly payment'),
+    ('juan.delacruz@example.com', 'BANK-REF-2002', 3500.00, 'bank_transfer', 'pending', 'Awaiting admin confirmation')
+) as v (email, reference_number, amount, payment_method, status, notes)
+join public.users u on u.email = v.email
+join public.loan_applications la on la.user_id = u.id and la.status = 'approved' and la.repayment_status = 'active';
+
+update public.loan_applications la
+set outstanding_balance = greatest(0, outstanding_balance - coalesce((
+    select sum(lp.amount)
+    from public.loan_payments lp
+    where lp.loan_application_id = la.id and lp.status = 'confirmed'
+), 0))
+where la.status = 'approved';
+
+update public.users u
+set balance_owed = coalesce((
+        select sum(coalesce(la.outstanding_balance, 0))
+        from public.loan_applications la
+        where la.user_id = u.id and la.repayment_status = 'active'
+    ), 0);

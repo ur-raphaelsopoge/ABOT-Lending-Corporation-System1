@@ -11,7 +11,7 @@ class MemberController
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('q', ''));
-        $pattern = '%' . addcslashes($search, '%_\\') . '%';
+        $pattern = '%'.addcslashes($search, '%_\\').'%';
 
         $members = User::query()
             ->when($search !== '', function ($query) use ($pattern) {
@@ -22,7 +22,6 @@ class MemberController
                         ->orWhere('email', 'ilike', $pattern);
                 });
             })
-            ->withSum('capitalShares as shares_total', 'amount')
             ->withCount(['loanApplications as approved_loans_count' => function ($query) {
                 $query->where('status', 'approved');
             }])

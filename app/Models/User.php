@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -9,7 +11,8 @@ use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable;
 
     public const LOAN_TYPES = [
         'personal' => [
@@ -71,8 +74,19 @@ class User extends Authenticatable
         return [
             'date_of_birth' => 'date',
             'monthly_income' => 'decimal:2',
+            'credits' => 'decimal:2',
+            'balance_owed' => 'decimal:2',
             'password' => 'hashed',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $user): void {
+            if (blank($user->borrower_id)) {
+                $user->borrower_id = 'BRW-'.str_pad((string) ((int) static::query()->max('id') + 1), 5, '0', STR_PAD_LEFT);
+            }
+        });
     }
 
     public function loanTypeLabel(): string
@@ -95,19 +109,28 @@ class User extends Authenticatable
         return Str::mask((string) $this->id_number, '•', 0, -4);
     }
 
+    public function hasActiveLoan(): bool
+    {
+        return (float) $this->balance_owed > 0
+            || $this->loanApplications()->where('repayment_status', 'active')->exists();
+    }
+
+    public function activeLoan(): ?LoanApplication
+    {
+        return $this->loanApplications()
+            ->where('repayment_status', 'active')
+            ->latest('id')
+            ->first();
+    }
+
     public function loanApplications(): HasMany
     {
         return $this->hasMany(LoanApplication::class);
     }
 
-    public function capitalShares(): HasMany
+    public function loanPayments(): HasMany
     {
-        return $this->hasMany(CapitalShare::class, 'member_id');
-    }
-
-    public function receiptLogs(): HasMany
-    {
-        return $this->hasMany(ReceiptLog::class, 'member_id');
+        return $this->hasMany(LoanPayment::class);
     }
 
     public function auditEntries(): HasMany

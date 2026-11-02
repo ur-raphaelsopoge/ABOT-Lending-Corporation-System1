@@ -65,4 +65,5 @@
     </a>
 
     <a class="btn btn-outline" href="{{ route('register') }}">Register (for Borrowers)</a>
+    <a class="btn btn-outline" href="{{ route('landing') }}">Back to Home</a>
 @endsection

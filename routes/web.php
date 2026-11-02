@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\Admin\ActiveLoanController;
 use App\Http\Controllers\Admin\AuditLedgerController;
-use App\Http\Controllers\Admin\CapitalShareController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LoanController;
+use App\Http\Controllers\Admin\LoanPaymentController;
 use App\Http\Controllers\Admin\MemberController;
-use App\Http\Controllers\Admin\ReceiptLogController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\UserHomeController;
@@ -13,16 +13,12 @@ use App\Http\Middleware\AdminGuestOnly;
 use App\Http\Middleware\AdminOnly;
 use App\Http\Middleware\BorrowerOnly;
 use App\Http\Middleware\GuestOnly;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    if (Auth::guard('admin')->check()) {
-        return redirect()->route('admin.dashboard');
-    }
-
-    return redirect()->route(Auth::guard('web')->check() ? 'home' : 'login');
-});
+Route::view('/', 'partials.landing')->name('landing');
+Route::view('/docs', 'partials.docs')->name('docs');
+Route::view('/policies', 'partials.policies')->name('policies');
+Route::view('/get-in-touch', 'partials.get-in-touch')->name('get-in-touch');
 
 Route::middleware(GuestOnly::class)->group(function () {
     Route::get('/login', [UserAuthController::class, 'showLogin'])->name('login');
@@ -54,6 +50,8 @@ Route::middleware(BorrowerOnly::class)->group(function () {
     Route::post('/logout', [UserAuthController::class, 'logout'])->name('logout');
     Route::get('/home', [UserHomeController::class, 'index'])->name('home');
     Route::post('/loan-applications', [UserHomeController::class, 'store'])->name('loan-applications.store');
+    Route::patch('/profile', [UserHomeController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/loan-payments', [UserHomeController::class, 'storePayment'])->name('loan-payments.store');
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -69,8 +67,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/dashboard', DashboardController::class)->name('dashboard');
         Route::get('/members', [MemberController::class, 'index'])->name('members.index');
-        Route::get('/capital-shares', [CapitalShareController::class, 'index'])->name('capital-shares.index');
-        Route::get('/receipt-logs', [ReceiptLogController::class, 'index'])->name('receipt-logs.index');
+        Route::get('/active-loans', [ActiveLoanController::class, 'index'])->name('active-loans.index');
+        Route::get('/loan-payments', [LoanPaymentController::class, 'index'])->name('loan-payments.index');
+        Route::patch('/loan-payments/{payment}', [LoanPaymentController::class, 'update'])->name('loan-payments.update');
         Route::get('/loans', [LoanController::class, 'index'])->name('loans.index');
         Route::patch('/loans/{application}', [LoanController::class, 'update'])->name('loans.update');
         Route::get('/audit-ledger', [AuditLedgerController::class, 'index'])->name('audit-ledger.index');
