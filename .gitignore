@@ -1,6 +1,5 @@
 *.log
 .DS_Store
-.env 
 .env.backup
 .env.production
 .phpactor.json
@@ -28,7 +27,6 @@ Thumbs.db
 /node_modules
 /public/build
 /public/hot
-.env
 .env.backup
 .env.production
 Thumbs.db
