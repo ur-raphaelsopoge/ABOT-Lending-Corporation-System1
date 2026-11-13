@@ -69,6 +69,12 @@ monthly amortization = total payable ÷ term in months
 
 Open the local URL printed by Artisan. Borrowers can register through the site. Administrators sign in through `/admin/login`; an administrator account must be configured in the application database.
 
+Capstone Members/Contributors:
+John Raphael D. Abino
+Roselyn Daguiso
+Mervin Aquis
+Adrian Arcabos
+
 <img width="1680" height="1050" alt="SYSTEM1" src="https://github.com/user-attachments/assets/5db2b6a1-126f-488b-babb-c99b78b336de" />
 <img width="1680" height="1050" alt="SYSTEM2" src="https://github.com/user-attachments/assets/66ab6f84-14fd-4982-b4fc-7287216330cc" />
 <img width="1680" height="1050" alt="SYSTEM4" src="https://github.com/user-attachments/assets/b2f0c227-aadf-46f1-9c5b-a4a9a40725f0" />
